@@ -1,0 +1,36 @@
+# Cấu hình Netlify. Có file này thì khi kết nối repo, Netlify tự điền sẵn
+# build command và thư mục xuất bản — không phải gõ tay, không sợ gõ sai.
+
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Trang chủ là web hoa (out/index.html).
+# Landing workshop nằm ở out/workshop/ — được chép sang từ public/workshop/
+# lúc build, nên KHÔNG cần luật chuyển hướng nào cho nó.
+
+# Ảnh và font không bao giờ đổi nội dung mà không đổi tên file, nên cho trình
+# duyệt giữ cache một năm. Riêng file HTML thì không cache, để lần sau sửa nội
+# dung là khách thấy ngay.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/brand/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/workshop/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

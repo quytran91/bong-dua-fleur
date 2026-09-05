@@ -1,26 +1,235 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — BÔNG DUA FLEUR
+   Toàn bộ hệ màu lấy từ chính logo: nền Deep Navy, monogram xanh,
+   đường nét Champagne Gold, điểm nhấn Aqua.
+   Đổi màu thương hiệu ở đúng khối @theme này, không sửa rải rác.
+   ═══════════════════════════════════════════════════════════════ */
+@theme {
+  --color-navy: #020d2d; /* nền thương hiệu, header, footer */
+  --color-cobalt: #0047ab; /* section nổi bật, nút */
+  --color-royal: #4169e1; /* trạng thái active, highlight */
+  --color-aqua: #00cfe8; /* hover, focus, ánh sáng nhẹ — chỉ trên nền tối */
+  --color-gold: #d8b36a; /* Champagne Gold: đường kẻ, số thứ tự, viền mảnh */
+
+  --color-mist: #f5faff; /* Soft Blue White — nền các section sáng */
+  --color-ink: #10213b; /* chữ trên nền sáng */
+  --color-muted: #627086; /* chữ phụ trên nền sáng */
+
+  /* Aqua nguyên bản chỉ đạt 1.8:1 trên nền trắng nên không dùng làm chữ ở
+     section sáng được. Hai màu dưới đây là bản đủ tương phản cho nền sáng. */
+  --color-aqua-deep: #067a8c;
+  --color-gold-deep: #8a6414;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+
+  /* Line-height cho tiêu đề lớn. Đo bằng chiều cao mực chữ thật của Playfair với
+     chính các câu tiếng Việt trên trang: dấu chồng (ố, ộ, ằ, Đ) đẩy phần trên của
+     mực chữ lên tới 1.07 lần cỡ font, cộng phần dưới thành 1.268. Dưới mức đó thì
+     dấu của dòng dưới chạm vào dấu của dòng trên.
+     Bản tiếng Anh của mẫu tham khảo để 1.0 được là vì tiếng Anh không có dấu chồng. */
+  --leading-display: 1.28;
+  --font-sans: var(--font-be-vietnam), system-ui, sans-serif;
+
+  /* Ảnh editorial dùng góc gần vuông. Cả giao diện KHÔNG bo tròn thành thẻ. */
+  --radius-img: 4px;
+  --radius-pill: 999px;
+
+  /* Bóng rất nhẹ — độ sâu đến từ tương phản và lớp lang, không từ shadow nặng. */
+  --shadow-soft: 0 1px 2px rgb(2 13 45 / 0.04), 0 8px 24px rgb(2 13 45 / 0.06);
+  --shadow-lift: 0 2px 6px rgb(2 13 45 / 0.06), 0 18px 44px rgb(2 13 45 / 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  /* Trừ chiều cao header dính khi nhảy tới #anchor, để tiêu đề không bị che. */
+  scroll-padding-top: 5.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Focus bằng Aqua, nhìn rõ trên cả nền sáng lẫn nền navy. */
+:focus-visible {
+  outline: 2px solid var(--color-aqua);
+  outline-offset: 3px;
+}
+
+/* ── Khung nội dung dùng chung ──────────────────────────────────
+   Container tối đa 1360px theo design system. Gom vào một class để
+   mọi section thẳng hàng nhau, thay vì lặp lại chuỗi tiện ích. */
+.wrap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1360px;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  .wrap { padding-inline: 2rem; }
+}
+@media (min-width: 1024px) {
+  .wrap { padding-inline: 2.5rem; }
+}
+
+/* ── Nhãn nhỏ phía trên tiêu đề ────────────────────────────────
+   Chữ hoa, rất nhỏ, giãn cách rộng — nhịp editorial mượn từ Urban Flora. */
+.eyebrow {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Gạch chân Champagne Gold ngắn, dùng làm dấu phân đoạn. */
+.rule-gold::before {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 1px;
+  background: var(--color-gold);
+  margin-bottom: 1.25rem;
+}
+
+/* ── Hiện dần khi cuộn tới ─────────────────────────────────────
+   Trạng thái mặc định là ĐÃ HIỆN. Chỉ khi JavaScript chạy được thì phần tử
+   mới được đặt về trạng thái ẩn rồi hiện ra — nhờ vậy nếu JS lỗi hoặc chưa
+   tải, nội dung vẫn đọc được và Google luôn thấy trang. */
+[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Chuyển động ở hero ────────────────────────────────────────
+   Dùng animation-fill-mode: both, nên khi người dùng bật "giảm chuyển động"
+   (khối @media ở cuối file rút thời lượng còn 0.01ms) thì phần tử nhảy thẳng
+   tới trạng thái cuối — hiện đầy đủ, không bao giờ mắc kẹt ở opacity 0. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hero-media {
+  from { opacity: 0; transform: translateY(26px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+/* Trôi rất chậm, biên độ 8px — đủ để trang có nhịp thở mà không gây phân tâm. */
+@keyframes drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Ảnh hero thu nhẹ về đúng cỡ khi tải trang. Bắt đầu ở 1.1 rồi về 1 — mắt đọc
+   thành "ống kính đang lùi ra", tạo cảm giác trang vừa mở ra chứ không phải
+   đứng sẵn ở đó. Chỉ chạy MỘT lần, không lặp.
+   Section hero đã có overflow-hidden nên phần ảnh phình ra không đẩy trang. */
+@keyframes hero-zoom {
+  from { transform: scale(1.1); }
+  to { transform: scale(1); }
+}
+
+/* ── Chữ hiện dần theo từng từ ──────────────────────────────────
+   Mờ + nhoè + nhích lên, so le từng mảnh. Dùng bởi components/AnimText.tsx.
+   Không đặt sẵn ở HTML tĩnh: chỉ khi JavaScript chạy thì class .aw mới được
+   gắn vào, nên trang không có JS vẫn đọc được đủ chữ. */
+.aw {
+  display: inline-block;
+  opacity: 0.001;
+  transform: translateY(10px);
+  filter: blur(10px);
+}
+/* .aw-in chỉ dùng cho hero (kiểu "tai"). Chữ gắn theo cuộn được ghi style trực
+   tiếp mỗi khung hình nên KHÔNG có transition — có transition thì chữ sẽ chạy
+   đuổi theo con trỏ cuộn, trễ và rung. */
+.aw-in {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Vệt bút dạ Champagne Gold ─────────────────────────────────
+   Dùng để làm nổi một cụm chữ ngắn giữa đoạn văn.
+
+   Vệt nằm ở lớp dưới (z-index -1) nên cần `isolation: isolate` ở thẻ cha, nếu
+   không nó sẽ chui xuống dưới cả nền thẻ trắng và biến mất.
+
+   Bốn bán kính bo góc cố ý lệch nhau để hai đầu vệt không đều tăm tắp — nét bút
+   dạ thật không bao giờ vuông vức.
+
+   Mặc định vệt ĐÃ VẼ XONG (scaleX 1). Chỉ khi JavaScript đánh dấu khối là chưa
+   hiện thì nó mới co về 0 rồi kéo ra — nhờ vậy không có JS vẫn thấy vệt. */
+.marker {
+  position: relative;
+  isolation: isolate;
+}
+.marker::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-inline: -0.34em;
+  bottom: 0.08em;
+  height: 1.15em;
+  background: linear-gradient(
+    170deg,
+    rgb(216 179 106 / 0.5) 0%,
+    rgb(216 179 106 / 0.9) 55%,
+    rgb(216 179 106 / 0.72) 100%
+  );
+  border-radius: 3px 10px 4px 12px / 10px 4px 12px 3px;
+  transform: scaleX(1);
+  transform-origin: left center;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+}
+[data-reveal="hidden"] .marker::before {
+  transform: scaleX(0);
+}
+
+/* Dải chữ chạy ngang. Nội dung được lặp hai lần trong DOM, chạy hết một bản là
+   quay lại vị trí đầu — mắt không thấy điểm nối. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 26s linear infinite;
+}
+
+.hero-rise { animation: hero-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-media { animation: hero-media 1.1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.drift { animation: drift 11s ease-in-out infinite; }
+.hero-zoom { animation: hero-zoom 2.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  /* AnimText đã tự bỏ qua khi bật chế độ này, nhưng chốt thêm một lớp ở CSS
+     phòng trường hợp người dùng đổi thiết lập sau khi trang đã tải. */
+  .aw { opacity: 1 !important; transform: none !important; filter: none !important; }
+  /* Vòng lặp vô tận phải tắt hẳn, không chỉ rút ngắn. */
+  .drift,
+  .marquee-track { animation: none !important; }
+  /* Zoom hero: bỏ hẳn, để ảnh đứng đúng cỡ ngay từ đầu. */
+  .hero-zoom { animation: none !important; }
 }
