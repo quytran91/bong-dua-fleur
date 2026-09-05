@@ -1,0 +1,53 @@
+# Tự động dựng và đưa web lên GitHub Pages mỗi khi có commit mới vào nhánh main.
+#
+# GitHub Pages không tự chạy `npm run build`, nên phải có file này: nó thuê một
+# máy ảo, cài phụ thuộc, build ra thư mục `out/`, rồi đẩy đúng thư mục đó lên.
+
+name: Dựng và đưa lên GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Cho phép bấm chạy tay từ tab Actions, khỏi phải commit giả để build lại.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nếu đang build dở mà có commit mới, huỷ lượt cũ — tránh hai lượt đè lên nhau.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` chứ không phải `npm install`: cài đúng phiên bản đã khoá trong
+      # package-lock.json, nên bản trên mạng luôn giống hệt bản chạy trên máy.
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
